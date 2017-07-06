@@ -35,7 +35,7 @@ public class BuildJob : ThreadedJob
             current.worldPos = queue[i].WorldPosition;
             current.world = queue[i].World;
 
-            current = tGenerator.ChunkGen(current);
+            //current = tGenerator.ChunkGen(current);
             current.SetBlocksUnmodified();
 
             // tell it that it needs to update

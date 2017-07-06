@@ -118,6 +118,7 @@ public class World : MonoBehaviour
 
             // load chunk
             StartCoroutine(BuildChunkColumn(newChunkX, newChunkZ));
+            //BuildChunkColumn(newChunkX, newChunkZ);
 
             return;
         }
@@ -270,6 +271,7 @@ public class World : MonoBehaviour
                 Debug.LogError("Duplicate Entry in Chunks Dictionary > " + newChunk.gameObject.name);
             }
 
+            //StartCoroutine(terrainGen.ChunkGen(newChunk, OnChunkFinishedCallback));
             newChunk = terrainGen.ChunkGen(newChunk);
             newChunk.SetBlocksUnmodified();
             newChunk.inPool = false;

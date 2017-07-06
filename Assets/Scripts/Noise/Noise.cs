@@ -199,9 +199,9 @@ namespace SimplexNoise
             float z3 = z0 - 1.0f + 3.0f * G3;
 
             // Wrap the integer indices at 256, to avoid indexing perm[] out of bounds
-            int ii = Mod(i, 256);
-            int jj = Mod(j, 256);
-            int kk = Mod(k, 256);
+            int ii = (i & 0xff);//Mod(i, 256);
+            int jj = (j & 0xff);//Mod(j, 256);
+            int kk = (k & 0xff);//Mod(k, 256);
 
             // Calculate the contribution from the four corners
             float t0 = 0.6f - x0 * x0 - y0 * y0 - z0 * z0;

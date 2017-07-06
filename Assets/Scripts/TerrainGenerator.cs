@@ -4,7 +4,14 @@ using SimplexNoise;
 
 public class TerrainGenerator
 {
-    int seed = 0;
+    private static int seed = 0;
+
+    private static BlockAir BLOCK_AIR;
+    private static BlockStone BLOCK_STONE;
+    private static BlockGrass BLOCK_GRASS;
+    private static BlockDirt BLOCK_DIRT;
+    private static BlockLeaf BLOCK_LEAF;
+    private static BlockWood BLOCK_WOOD;
 
     private float stoneBaseHeight = -24;
     private float stoneBaseNoise = 0.05f;
@@ -25,7 +32,13 @@ public class TerrainGenerator
     public void Init()
     {
         //seed = UnityEngine.Random.Range(0, int.MaxValue);
-    }
+        BLOCK_AIR = new BlockAir();
+        BLOCK_STONE = new BlockStone();
+        BLOCK_DIRT = new BlockDirt();
+        BLOCK_GRASS = new BlockGrass();
+        BLOCK_LEAF = new BlockLeaf();
+        BLOCK_WOOD = new BlockWood();
+    } 
 
     public Chunk ChunkGen(Chunk chunk)
     {
@@ -43,32 +56,34 @@ public class TerrainGenerator
     public Chunk ChunkColumnGen(Chunk chunk, int x, int z)
     {
         int stoneHeight = SimplexNoise.Noise.FastFloor(stoneBaseHeight);
-        stoneHeight += GetNoise(x, 0 + seed, z, stoneMountainFrequency, SimplexNoise.Noise.FastFloor(stoneMountainHeight));
+        stoneHeight += GetNoise(x, 0, z, stoneMountainFrequency, SimplexNoise.Noise.FastFloor(stoneMountainHeight));
 
         if (stoneHeight < stoneMinHeight)
         {
             stoneHeight = SimplexNoise.Noise.FastFloor(stoneMinHeight);
         }
 
-        stoneHeight += GetNoise(x, 0 + seed, z, stoneBaseNoise, SimplexNoise.Noise.FastFloor(stoneBaseNoiseHeight));
+        stoneHeight += GetNoise(x, 0, z, stoneBaseNoise, SimplexNoise.Noise.FastFloor(stoneBaseNoiseHeight));
         int dirtHeight = stoneHeight + SimplexNoise.Noise.FastFloor(dirtBaseHeight);
-        dirtHeight += GetNoise(x, 100 + seed, z, dirtNoise, SimplexNoise.Noise.FastFloor(dirtNoiseHeight));
+        dirtHeight += GetNoise(x, 100, z, dirtNoise, SimplexNoise.Noise.FastFloor(dirtNoiseHeight));
 
         // starting at half the chunk height, and count up chunk height units, accounting for world pos
-        for (int y = (int)(chunk.worldPos.y - (Chunk.chunkSize / 2f)); y < chunk.worldPos.y + Chunk.chunkSize; y++)
+        int start = (int)(chunk.worldPos.y - (Chunk.chunkSize / 2f));
+        int end = (int)chunk.worldPos.y + Chunk.chunkSize;
+        for (int y = start; y < end; y++)
         {
             //Get a value to base cave generation on
-            int caveChance = GetNoise(x, y + seed, z, caveFrequency, 100);
+            //int caveChance = GetNoise(x, y, z, caveFrequency, 100);
             if (y <= stoneHeight )//&& caveSize < caveChance)
             {
-                SetBlock(x, y, z, new BlockStone(), chunk);
+                SetBlock(x, y, z, BLOCK_STONE, chunk);
             }
             else if (y == dirtHeight )//&& caveSize < caveChance)
             {
-                SetBlock(x, y, z, new BlockGrass(), chunk);
+                SetBlock(x, y, z, BLOCK_GRASS, chunk);
 
                 // trees
-                int treeChance = GetNoise(x, 0 + seed, z, treeFrequency, 100);
+                int treeChance = GetNoise(x, 0, z, treeFrequency, 100);
                 if (y == dirtHeight && treeChance < treeDensity)
                 {
                     CreateTree(x, y + 1, z, chunk);
@@ -76,11 +91,11 @@ public class TerrainGenerator
             }
             else if (y < dirtHeight) //&& caveSize < caveChance)
             {
-                SetBlock(x, y, z, new BlockDirt(), chunk);
+                SetBlock(x, y, z, BLOCK_DIRT, chunk);
             }
             else
             {
-                SetBlock(x, y, z, new BlockAir(), chunk);
+                SetBlock(x, y, z, BLOCK_AIR, chunk);
             }
         }
 
@@ -96,7 +111,7 @@ public class TerrainGenerator
             {
                 for (int zi = -2; zi <= 2; zi++)
                 {
-                    SetBlock(x + xi, y + yi, z + zi, new BlockLeaf(), chunk, true);
+                    SetBlock(x + xi, y + yi, z + zi, BLOCK_LEAF, chunk, true);
                 }
             }
         }
@@ -104,7 +119,7 @@ public class TerrainGenerator
         //create trunk
         for (int yt = 0; yt < 6; yt++)
         {
-            SetBlock(x, y + yt, z, new BlockWood(), chunk, true);
+            SetBlock(x, y + yt, z, BLOCK_WOOD, chunk, true);
         }
     }
 
@@ -124,6 +139,6 @@ public class TerrainGenerator
 
     public static int GetNoise(int x, int y, int z, float scale, int max)
     {
-        return Mathf.FloorToInt((Noise.Generate(x * scale, y * scale, z * scale) + 1f) * (max / 2f));
+        return (int)((Noise.Generate(x * scale, (y + seed) * scale, z * scale) + 1f) * (max / 2f));
     }
 }
