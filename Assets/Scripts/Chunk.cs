@@ -5,6 +5,8 @@ public class Chunk : MonoBehaviour
 {
     public static int chunkSize = 16;
 
+    private MeshData meshData;
+
     public bool update = false;
     public bool rendered = false;
     public bool built = false;
@@ -17,9 +19,19 @@ public class Chunk : MonoBehaviour
 
     public Block[,,] blocks = new Block[chunkSize, chunkSize, chunkSize];
 
-    public void DrawChunk()
+    public void UpdateMesh()
     {
-        UpdateChunk();
+        meshData = new MeshData();
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int y = 0; y < chunkSize; y++)
+            {
+                for (int z = 0; z < chunkSize; z++)
+                {
+                    meshData = blocks[x, y, z].Blockdata(this, x, y, z, meshData);
+                }
+            }
+        }
     }
 
     public void SetBlocksUnmodified()
@@ -71,41 +83,28 @@ public class Chunk : MonoBehaviour
         return true;
     }
 
-    // Updates the chunk based on its contents
-    void UpdateChunk()
+    public void RenderMesh()
     {
-        MeshData meshData = new MeshData();
-        for (int x = 0; x < chunkSize; x++)
-        {
-            for (int y = 0; y < chunkSize; y++)
-            {
-                for (int z = 0; z < chunkSize; z++)
-                {
-                    meshData = blocks[x, y, z].Blockdata(this, x, y, z, meshData);
-                }
-            }
-        }
-
         RenderMesh(meshData);
         rendered = true;
     }
 
     // Sends the calculated mesh information
     // to the mesh and collision components
-    void RenderMesh(MeshData meshData)
+    void RenderMesh(MeshData mData)
     {
         filter.mesh.Clear();
-        filter.mesh.vertices = meshData.vertices.ToArray();
-        filter.mesh.triangles = meshData.triangles.ToArray();
+        filter.mesh.vertices = mData.vertices.ToArray();
+        filter.mesh.triangles = mData.triangles.ToArray();
 
-        filter.mesh.uv = meshData.uv.ToArray();
+        filter.mesh.uv = mData.uv.ToArray();
         filter.mesh.RecalculateNormals();
 
         // collision
         coll.sharedMesh = null;
         Mesh mesh = new Mesh();
-        mesh.vertices = meshData.colVertices.ToArray();
-        mesh.triangles = meshData.colTriangles.ToArray();
+        mesh.vertices = mData.colVertices.ToArray();
+        mesh.triangles = mData.colTriangles.ToArray();
         mesh.RecalculateNormals();
 
         coll.sharedMesh = mesh;

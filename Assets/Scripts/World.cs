@@ -38,7 +38,6 @@ public class World : MonoBehaviour
     private bool isBuilding = false;
 
     public string worldName = "World";
-    private TerrainGenerator terrainGen = new TerrainGenerator();
     private Vector3 previousPlayerPos = new Vector3();
     private Vector3 currentPlayerPos = new Vector3();
     private float chunkRange = 40;
@@ -182,8 +181,8 @@ public class World : MonoBehaviour
     {
         for (int i = 0; i < data.Count; i++)
         {
-            data[i].DrawChunk();
-            //data[i].inPool = false;
+            data[i].UpdateMesh();
+            data[i].RenderMesh();
 
             yield return null;
         }
@@ -289,7 +288,7 @@ public class World : MonoBehaviour
         if (chunk != null)
         {
             chunk.SetBlock(x - (int)chunk.worldPos.x, y - (int)chunk.worldPos.y, z - (int)chunk.worldPos.z, block);
-            chunk.DrawChunk();
+            chunk.UpdateMesh();
 
             // update adjacent chunks
             UpdateIfEqual(x - (int)chunk.worldPos.x, 0, new Vector3(x - 1, y, z));
@@ -326,7 +325,7 @@ public class World : MonoBehaviour
         {
             Chunk chunk = GetChunk((int)pos.x, (int)pos.y, (int)pos.z);
             if (chunk != null)
-                chunk.DrawChunk();
+                chunk.UpdateMesh();
         }
     }
 }
