@@ -83,8 +83,6 @@ public class Chunk : MonoBehaviour
     // Updates the chunk based on its contents
     void UpdateChunk()
     {
-        rendered = true;
-
         MeshData meshData = new MeshData();
         for (int x = 0; x < chunkSize; x++)
         {
@@ -98,6 +96,7 @@ public class Chunk : MonoBehaviour
         }
 
         RenderMesh(meshData);
+        rendered = true;
     }
 
     // Sends the calculated mesh information
