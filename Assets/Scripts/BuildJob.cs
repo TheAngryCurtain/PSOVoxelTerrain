@@ -42,9 +42,6 @@ public class BuildJob : ThreadedJob
             current = tGenerator.ChunkGen(current);
             current.SetBlocksUnmodified();
 
-            // tell it that it needs to update
-            //current.DrawChunk();
-
             // store a copy to return
             finishedChunks.Add(current);
 

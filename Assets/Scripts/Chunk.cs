@@ -17,15 +17,6 @@ public class Chunk : MonoBehaviour
 
     public Block[,,] blocks = new Block[chunkSize, chunkSize, chunkSize];
 
-    //void Update()
-    //{
-    //    if (update)// && built)
-    //    {
-    //        update = false;
-    //        UpdateChunk();
-    //    }
-    //}
-
     public void DrawChunk()
     {
         UpdateChunk();

@@ -42,9 +42,9 @@ public class World : MonoBehaviour
     private Vector3 previousPlayerPos = new Vector3();
     private Vector3 currentPlayerPos = new Vector3();
     private float chunkRange = 40;
+    private int queueBuildSize = 10;
 
     private BuildJob _buildJob;
-    //private RenderJob _renderJob;
     
     private void Start()
     {
@@ -52,8 +52,6 @@ public class World : MonoBehaviour
 
         int numChunks = 300;
         Init(numChunks);
-
-        //terrainGen.Init();
     }
 
     private void OnDestroy()
@@ -73,11 +71,6 @@ public class World : MonoBehaviour
 
         _buildJob = new BuildJob();
         _buildJob.Setup();
-
-        //_renderJob = new RenderJob();
-
-        //_buildJob.OnJobComplete += OnBuildJobComplete;
-        //_renderJob.OnJobComplete += OnRenderJobComplete;
     }
 
     private void OnPlayerPositionUpdated(GameEvents.PlayerPositionUpdateEvent e)
@@ -130,7 +123,6 @@ public class World : MonoBehaviour
     //private IEnumerator BuildChunkColumn(int chunkX, int chunkZ)
     private void BuildChunkColumn(int chunkX, int chunkZ)
     {
-        //int halfHeight = (int)(Chunk.chunkSize / 2f);
         int topMost = 4;
         int bottomMost = -2;
         for (int y = topMost; y > bottomMost; y--)
@@ -142,7 +134,6 @@ public class World : MonoBehaviour
                     // create it if one doesn't exist
                     if (GetChunk(x, y * Chunk.chunkSize, z) == null)
                     {
-                        //CreateChunk(x, y * Chunk.chunkSize, z);
                         QueueChunk(x, y * Chunk.chunkSize, z);
 
                         //yield return new WaitForEndOfFrame();
@@ -182,33 +173,21 @@ public class World : MonoBehaviour
         chunkPool[poolIndex] = newChunk;
     }
 
-    //private void OnBuildJobComplete(object returnData)
-    ////private void OnBuildJobComplete()
-    //{
-    //    List<ChunkData> processedData = (List<ChunkData>)returnData;
-    //    for (int i = 0; i < processedData.Count; i++)
-    //    {
-    //        processedData[i].Chunk.DrawChunk();
-    //        processedData[i].Chunk.inPool = false;
-    //        //processedData[i].Chunk.built = true;
-    //    }
-
-    //    isBuilding = false;
-    //}
-
     private void OnBuildJobFinished(List<Chunk> data)
+    {
+        StartCoroutine(DrawChunks(data));
+    }
+
+    private IEnumerator DrawChunks(List<Chunk> data)
     {
         for (int i = 0; i < data.Count; i++)
         {
             data[i].DrawChunk();
             //data[i].inPool = false;
+
+            yield return null;
         }
     }
-
-    //private void OnRenderJobComplete()
-    //{
-
-    //}
 
     private Chunk GetUnusedChunkFromPool()
     {
@@ -249,19 +228,8 @@ public class World : MonoBehaviour
             }
 
             // add the new chunkData to the queue
-            // if it's running, do nothing
-            // if it's not, copy the queue over and start it
             ChunkData cData = new ChunkData(worldPos, newChunk, this);
             chunkQueue.Add(cData);
-
-            //if (!isBuilding && chunkQueue.Count >= 5)
-            //{
-            //    _buildJob.SetQueue(chunkQueue);
-            //    chunkQueue.Clear();
-
-            //    _buildJob.Start();
-            //    isBuilding = true;
-            //}
         }
     }
 
@@ -278,7 +246,7 @@ public class World : MonoBehaviour
         }
         else
         {
-            if (chunkQueue.Count >= 10)
+            if (chunkQueue.Count >= queueBuildSize)
             {
                 _buildJob.SetQueue(chunkQueue);
                 chunkQueue.Clear();
@@ -288,40 +256,6 @@ public class World : MonoBehaviour
             }
         }
     }
-
-    //public void CreateChunk(int x, int y, int z)
-    //{
-    //    Vector3 worldPos = new Vector3(x, y, z);
-    //    Chunk newChunk = GetUnusedChunkFromPool();
-    //    if (newChunk != null)
-    //    {
-    //        newChunk.transform.position = worldPos;
-    //        newChunk.gameObject.name = string.Format("Chunk [{0},{1},{2}]", x, y, z);
-
-    //        newChunk.worldPos = worldPos;
-    //        newChunk.world = this;
-
-    //        //Add it to the chunks dictionary with the position as the key
-    //        if (!chunks.ContainsKey(worldPos))
-    //        {
-    //            chunks.Add(worldPos, newChunk);
-    //        }
-    //        else
-    //        {
-    //            Debug.LogError("Duplicate Entry in Chunks Dictionary > " + newChunk.gameObject.name);
-    //        }
-
-    //        //StartCoroutine(terrainGen.ChunkGen(newChunk, OnChunkFinishedCallback));
-    //        newChunk = terrainGen.ChunkGen(newChunk);
-    //        newChunk.SetBlocksUnmodified();
-    //        newChunk.inPool = false;
-
-    //        // set it to update
-    //        newChunk.DrawChunk();
-
-    //        //Serialization.Load(newChunk);
-    //    }
-    //}
 
     public Chunk GetChunk(int x, int y, int z)
     {
